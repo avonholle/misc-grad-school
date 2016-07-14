@@ -1,4 +1,4 @@
-* Bootstrapping survival diffs at last time point;
+﻿* Bootstrapping survival diffs at last time point;
 
 
 * 1) make fake data;
@@ -36,7 +36,7 @@ proc means data=fake; var exposure; run; * check;
 
 ods select parameterestimates;
 proc phreg data=fake;
-	class exposure;
+	class exposure / desc;
  	 model t*delta(0,2) = exposure;
 	 baseline out=surv1 survival=s;
 run;
@@ -56,7 +56,7 @@ proc print data=covs2; run;
 
 ods select parameterestimates;
 proc phreg data=fake;
-	class exposure;
+	class exposure / desc;
 	model t*delta(0,2) = exposure;
 	baseline covariates=covs2 out=base survival=s stderr=se / method=pl; *output survival function and se;
 run;
@@ -101,7 +101,7 @@ ods listing close;
 * get survival estimates for each replicate for each exposure;
 proc phreg data=bootsample;
 by replicate;
-	class exposure;
+	class exposure / desc;
 	model t*delta(0,2) = exposure;
 	baseline covariates=covs2 out=base survival=s stderr=se / method=pl; *output survival function and se;
 run;

@@ -24,6 +24,9 @@ output:
   ### Specify packages for R and seed
 
   library(survival)
+  library(data.table) 
+  library(boot)
+  library(plyr)
   set.seed(123) # set seed so you get same results each time you run.
 ```
 
@@ -32,10 +35,11 @@ saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
 sasopts <- "-nosplash -log 'c:\\temp' -ls 80 -ps 60  -nocenter -nodate" # see http://bit.ly/1QB4ZTb
 ```
 
+# SAS code to generate risk difference at last observed time point with bootstrapped confidence intervals.
+
 ```{r s-read, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 
 * Bootstrapping survival diffs at last time point;
-
 
 * 1) make fake data;
 
@@ -43,7 +47,7 @@ sasopts <- "-nosplash -log 'c:\\temp' -ls 80 -ps 60  -nocenter -nodate" # see ht
 /* See Bender 2005 (doi: 10.1002/sim.2059) */
 
 data fake;
-	call streaminit(722);
+	call streaminit(1234);
 	shape1=1;
 	do i = 1 to 100;
 		exposure = (rand('NORMAL',0,1)>0); * make binary exposure;
@@ -72,7 +76,7 @@ proc means data=fake; var exposure; run; * check;
 
 ods select parameterestimates;
 proc phreg data=fake;
-	class exposure;
+	class exposure / desc;
  	 model t*delta(0,2) = exposure;
 	 baseline out=surv1 survival=s;
 run;
@@ -92,7 +96,7 @@ proc print data=covs2; run;
 
 ods select parameterestimates;
 proc phreg data=fake;
-	class exposure;
+	class exposure / desc;
 	model t*delta(0,2) = exposure;
 	baseline covariates=covs2 out=base survival=s stderr=se / method=pl; *output survival function and se;
 run;
@@ -124,7 +128,7 @@ run;
 * SEE http://www.ats.ucla.edu/stat/sas/faq/bootstrap.htm;
 * -------------------------------------------------------;
 
-%let rep = 10;	
+%let rep = 100;	
 proc surveyselect data= fake out=bootsample
      seed = 124 method = urs
 	 samprate = 1 outhits rep = &rep;
@@ -137,7 +141,7 @@ ods listing close;
 * get survival estimates for each replicate for each exposure;
 proc phreg data=bootsample;
 by replicate;
-	class exposure;
+	class exposure / desc;
 	model t*delta(0,2) = exposure;
 	baseline covariates=covs2 out=base survival=s stderr=se / method=pl; *output survival function and se;
 run;
@@ -175,5 +179,120 @@ proc sql;
   from base3;
 quit; 
 
+```
+
+
+# R version of SAS code above
+
+## Generate data
+
+```{r-gen}
+
+  N=100
+  shape.t1 = 1 # cvd event
+  shape.t2 = 1 # all-cause mortality
+  shape.c = 1 # censoring hazard, shape=1: exponential distribution
+  
+      exposure = ifelse(runif(N)>0.5,1,0) # binary exposure variable split evenly
+      
+      lp.1 = log(0.5)*exposure # linear predictor for proportional odds model
+      
+      # Weibull latent event times (really exponential)
+      v <- runif(N)
+      t.1 <- (- log(v) / (0.011 * exp(lp.1)))^(1 / shape.t1)
+      
+      # censoring times
+      c = rexp(n=N, rate=1)*200
+      
+      # follow-up times and event indicators vectors
+      t.orig = pmin(t.1,  c) # take min of time of 3 parallel        
+      
+      delta = ifelse(t.orig>10, 0,
+                   ifelse(t.orig==t.1, 1,
+                                 ifelse(t.orig==c, 2, NA))) # 0 and 2 are censored, 1 is event
+
+      event = ifelse(delta %in% c(1), 1, 0)
+
+      t = ifelse(t.orig>10, 10, t.orig) # administrative censoring at 10 years.
+      
+      delta.f = factor(delta, labels = c("admin censor", "event", "censor"))
+      
+      table(event)
+      coef(coxph(Surv(t, event) ~ exposure)) # check
+      
+      fake.dat = data.frame(t = t, event=event, exposure=exposure)
+```      
+      
+## Get observed risk from data
+
+```{r getrisk}
+      # get risk and time info from data
+      
+      dat1 = summary(survfit(Surv(t, event) ~ 1 + strata(exposure), data=fake.dat))
+      dat2 = data.frame(
+        strata = dat1$strata,
+        t = dat1$time,
+        n = dat1$n.risk,
+        r = dat1$surv)
+      head(dat2)
+      
+      # pick last risk estimate for each strata 
+      dt2 = data.table(dat2)
+      head(dt2)
+      dt2[, .SD[c(.N)], by=strata]
+
+      
+      ddply(dat2, "strata", function(z) tail(z,1)) # different way to get last row by group
+
+      
+      # Get observed diff at last time point for each strata
+      obs.diff = dt2$r[2] - dt2$r[1]; obs.diff
+      
+```
+
+
+## Now boostrap data and get risk differences for each boostrap sample
+
+```{r boot}
+
+# Get bootstrap samples
+
+# Function to obtain risk diff from the data
+get.diff <- function(data, i) {
+    d <- data[i,] # allows boot to select 
+
+  dat1.pre = survfit(Surv(t, event) ~ 1 + strata(exposure), data=d)
+  dat1 = summary(dat1.pre)
+  
+      dat2.1 = data.frame(
+        strata = dat1$strata,
+        t = dat1$time,
+        n = dat1$n.risk,
+        r = dat1$surv)
+  
+      # pick last risk estimate for each strata 
+      dt2.1 = ddply(dat2.1, "strata", function(z) tail(z,1) )
+      
+#      dt2.1 = data.table(dat2.1)
+#      dt2.1[, .SD[c(.N)], by=strata]
+
+      # Get observed diff at last time point for each strata
+      diff.1 = dt2.1$r[2] - dt2.1$r[1]
+
+      return(diff.1)
+
+} 
+
+# bootstrapping with 100 replications (this is just an example and I want this to run quickly)
+results <- boot(data=fake.dat, 
+                statistic=get.diff,
+                R=100)
+
+results$t0 # the observed difference
+mean(results$t, na.rm=T) - results$t0
+sd(results$t, na.rm=T)
+
+plot(results)
+boot.ci(results, type="basic") # get bootstrapped confidence intervals
 
 ```
