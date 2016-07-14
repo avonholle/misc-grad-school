@@ -3,5 +3,5 @@
 A repository for small projects unrelated to my dissertation
 
 
-1. <a href="/survival/risk-diff.html?raw=true" target="_blank">bootstrapped risk differences</a>  -- [code](/survival/risk-diff.Rmd)
+1. [bootstrapped risk diff](https://rawgit.com/avonholle/misc-grad-school/survival/risk-diff.html])  -- [code](/survival/risk-diff.Rmd)
 2. 
