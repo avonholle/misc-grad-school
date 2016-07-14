@@ -1,0 +1,21 @@
+---
+title: "Bootstrap risk difference"
+author: 'Ann Von Holle'
+date: "July 14, 2016"
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
+output:
+  html_document:
+   toc: true
+   toc_depth: 4 
+   theme: united
+   number_sections: true
+---
+
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
