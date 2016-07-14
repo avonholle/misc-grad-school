@@ -20,7 +20,7 @@ output:
 ```
 
 
-```{r, echo=FALSE}
+```{r packages, echo=FALSE}
   ### Specify packages for R and seed
 
   library(survival)
