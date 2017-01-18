@@ -46,17 +46,20 @@ getwd() # double check the working directory
 ## Read in data
 ```{r getdata}
 # Search 'blood pressure' and download text tab-delimited file.
-bp = read.table("gwas-association-downloaded_2017-01-18-blood.tsv", header=T, sep="\t")
+bp = read.table("gwas-association-downloaded_2017-01-18-blood.tsv", header=T, sep="\t",
+                fill=T)
 dim(bp)
 bp.snp = gsub('-.*$', "\\1", bp$STRONGEST.SNP.RISK.ALLELE);  # take out allele value at end
 
 # Search 'cholesterol' and download text tab-delimited file.
-chol = read.table("gwas-association-downloaded_2017-01-18-cholesterol.tsv", header=T, sep="\t")
+chol = read.table("gwas-association-downloaded_2017-01-18-cholesterol.tsv", header=T, sep="\t",
+                  fill=T)
 dim(chol)
 chol.snp = gsub('-.*$', "\\1", chol$STRONGEST.SNP.RISK.ALLELE); # take out allele value at end
 
 # Search 'obesity' and download text tab-delimited file.
-ob = read.table("gwas-association-downloaded_2017-01-18-obesity.tsv", header=T, sep="\t")
+ob = read.table("gwas-association-downloaded_2017-01-18-obesity.tsv", header=T, sep="\t",
+                fill=T)
 dim(ob)
 ob.snp = gsub('-.*$', "\\1", ob$STRONGEST.SNP.RISK.ALLELE);  # take out allele value at end
 
