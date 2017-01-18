@@ -1,0 +1,121 @@
+---
+title: "Venn Diagram Example"
+author: "Ann Von Holle"
+date: "January 18, 2017"
+output:
+  html_document:
+   toc: true
+   toc_depth: 4 
+   theme: united
+   number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+   
+require("gdata") # NOTE: you have to install active perl program and make sure it is in the PATH for Microsoft Windows computers.
+require(plyr)
+require("VennDiagram")
+
+```
+
+# Background
+
+Set up a Venn Diagram that imitates Figure 1 from Christy Avery's draft grant proposal. In this proposal there is a figure representing a Venn diagram with intersecting loci for the following domains:
+
+1. blood pressure
+2. cholesterol
+3. ecg
+4. glycemic
+5. obesity
+
+Note: this figure set up after copying code and following the example you can find [here](https://www.r-bloggers.com/working-with-venn-diagrams/)
+
+# Set up data
+
+Note: I omitted ecg search in traits
+
+
+Download association results after typing in terms listed above at http://www.ebi.ac.uk/gwas/
+
+```{r, echo=F, eval=FALSE}
+getwd() # double check the working directory
+```
+
+## Read in data
+```{r getdata}
+# Search 'blood pressure' and download text tab-delimited file.
+bp = read.table("gwas-association-downloaded_2017-01-18-blood.tsv", header=T, sep="\t")
+dim(bp)
+bp.snp = gsub('-.*$', "\\1", bp$STRONGEST.SNP.RISK.ALLELE);  # take out allele value at end
+
+# Search 'cholesterol' and download text tab-delimited file.
+chol = read.table("gwas-association-downloaded_2017-01-18-cholesterol.tsv", header=T, sep="\t")
+dim(chol)
+chol.snp = gsub('-.*$', "\\1", chol$STRONGEST.SNP.RISK.ALLELE); # take out allele value at end
+
+# Search 'obesity' and download text tab-delimited file.
+ob = read.table("gwas-association-downloaded_2017-01-18-obesity.tsv", header=T, sep="\t")
+dim(ob)
+ob.snp = gsub('-.*$', "\\1", ob$STRONGEST.SNP.RISK.ALLELE);  # take out allele value at end
+
+# Search 'glycemic' and download text tab-delimited file.
+gly = read.table("gwas-association-downloaded_2017-01-18-glycemic.tsv", header=T, sep="\t",
+                 fill=T)
+dim(gly)
+gly.snp = gsub('-.*$', "\\1", gly$STRONGEST.SNP.RISK.ALLELE);  # take out allele value at end
+
+loci.list = rbind.fill(data.frame(bp.snp), 
+                       data.frame(chol.snp),
+                       data.frame(ob.snp),
+                       data.frame(gly.snp))
+dim(loci.list)
+
+head(loci.list)
+tail(loci.list)
+
+```
+
+## Data handling for Venn plot
+
+```{r}
+# NOTE: all code in this section adapted/copied from https://www.r-bloggers.com/working-with-venn-diagrams/
+
+# To convert this data frame to separate gene lists with the empty strings removed we can use lapply() with our home made  function(x) x[x != ""]
+geneLS <- lapply(as.list(loci.list), function(x) x[!(is.na(x)==T)])
+
+# You can print the last 6 entries of each vector stored in your list, as follows:
+lapply(geneLS, tail)
+
+
+# We can rename our list vectors
+names(geneLS) <- c("bp", "chol", "ob", "gly")
+
+```
+
+# The Venn plot
+
+```{r plot}
+# Now we can plot a Venn diagram with the VennDiagram R package, as follows:
+VENN.LIST <- geneLS
+venn.plot <- venn.diagram(VENN.LIST , NULL, 
+                          fill=c("darkmagenta", "darkblue", "red", "lightblue"), 
+                          alpha=c(0.5,0.5,0.5,0.5), cex = 2, cat.fontface=4,
+                          category.names=c("Blood Pressure", "Cholesterol", "Obesity", "Glycemic"), 
+                          main="Figure 1")
+
+# To plot the venn diagram we will use the grid.draw() function to plot the venn diagram
+grid.draw(venn.plot)
+
+```
+
+
+## Save as a .png file
+
+```{r output}
+
+png('venn.png', res=300, width=8, height=6, units='in')
+  grid.draw(venn.plot)
+dev.off()
+
+```
