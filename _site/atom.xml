@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>Misc Projects</title>
+ <link href="http://localhost:4000/atom.xml" rel="self"/>
+ <link href="http://localhost:4000/"/>
+ <updated>2017-01-18T10:59:37-05:00</updated>
+ <id>http://localhost:4000</id>
+ <author>
+   <name>Ann Von Holle</name>
+   <email></email>
+ </author>
+
+ 
+ <entry>
+   <title>Introduction</title>
+   <link href="http://localhost:4000/2016/12/13/update/"/>
+   <updated>2016-12-13T00:00:00-05:00</updated>
+   <id>http://localhost:4000/2016/12/13/update</id>
+   <content type="html">&lt;p&gt;This web page will contain information on my dissertation work. For now the only information pertains to the dissertation proposal including the formatted draft and workflow leading to draft (see link to  ‘proposal’ work).&lt;/p&gt;
+</content>
+ </entry>
+ 
+
+</feed>

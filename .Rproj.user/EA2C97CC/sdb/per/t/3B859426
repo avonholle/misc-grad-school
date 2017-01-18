@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "<div class=\"sidebar\">\n  <div class=\"container sidebar-sticky\">\n    <div class=\"sidebar-about\">\n      <h1>\n        <a href=\"{{ site.baseurl }}\">\n\t\t{{site.title}}\n        </a>\n      </h1>\n      <p class=\"lead\">{{ site.description }}</p>\n    </div>\n\n <nav class=\"sidebar-nav\">\n\n      <a class=\"sidebar-nav-item{% if page.url == site.baseurl %} active{% endif %}\" href=\"{{ site.baseurl }}\">Home</a>\n      <a class=\"sidebar-nav-item\"><hr/></a>\n      \n      <p>Dissertation</p>\n      <a class=\"sidebar-nav-item{% if page.url == '/growth-traj/' %} active{% endif %}\" href=\"/diss/\">Dissertation proposal</a>\n      <a class=\"sidebar-nav-item\"><hr/></a>\n\n      <p>Manuscripts in development</p>\n      <a class=\"sidebar-nav-item{% if page.url == '/growth-traj/' %} active{% endif %}\" href=\"/growth-traj/\">1. Growth trajectories</a>\n      <a class=\"sidebar-nav-item{% if page.url == '/lipid-var-child/' %} active{% endif %}\" href=\"/lipid-var-child/\">2. Lipid variants in SLCS</a>\n      <a class=\"sidebar-nav-item{% if page.url == '/cfa-lipids/' %} active{% endif %}\" href=\"/cfa-lipids/\">3. CFA lipids</a>\n\n      <a class=\"sidebar-nav-item\"><hr/></a>\n      \n      <a class=\"sidebar-nav-item{% if page.url == '/about/' %} active{% endif %}\" href=\"/about\">About</a>\n      <a class=\"sidebar-nav-item{% if page.url == '/unc-dissertation-markdown/LICENSE.md' %} active{% endif %}\" href=\"/unc-dissertation-markdown/LICENSE.md\">License</a>\n      <a class=\"sidebar-nav-item\" href=\"{{ site.github.repo }}\">Gitub</a>\n</nav>\n\n\n    <p>&copy; {{ site.time | date: '%Y' }}. All rights reserved.</p>\n    <p>this web page based on the hyde jekyll theme</p>\n  </div>\n</div>\n",
+    "created" : 1484581269492.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1430913626",
+    "id" : "3B859426",
+    "lastKnownWriteTime" : 1484581488,
+    "last_content_update" : 1484581488418,
+    "path" : "~/unc.grad.school/github-repos/_includes/sidebar.html",
+    "project_path" : "_includes/sidebar.html",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "html"
+}

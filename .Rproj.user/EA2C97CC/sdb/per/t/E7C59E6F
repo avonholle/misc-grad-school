@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "---\nlayout: page\ntitle: lipid variants in Santiago Longitudinal Cohort Study (SLCS)\n---\n\n# Title\n\nLipid-related genetic variants and lipid outcomes in a cohort of Chilean children (SLCS)\n\n# Status\n\nMaking poster for [AHA EPID/Lifestyle 2017](http://professional.heart.org/professional/EducationMeetings/MeetingsLiveCME/EPILifestyle/UCM_316904_EPILifestyle-Scientific-Sessions.jsp) meetings.\n\n[Abstract for AHA EPID/Lifestyle 2017 poster](https://docs.google.com/document/d/1oWVlT5LMdC0VwVn9MKpZvi1RuWmRHOrXWTv0q6OUkj4/edit?usp=sharing)\n\n# Statistical Analysis Plan (SAP)\n\n[SAP with draft abstract](../ms-201608-1/StatisticalAnalysisPlan.html)\n\n# Manuscript draft\n\n[Link to google docs draft here.]\n\n# Repo\n\n[put link to github repo here]\n\n---\n\n# Results\n\n[Preliminary summary of results](../ms-201608-1/analysis-summary.pdf)\n\n\n## Prep work for December 2016 presentation\n\n[Online slides](../ms-201608-1/chile-slides-201612.html)\n\n\n## Additional information\n\n1. [information on the phenotype](../ms-201608-1/phenotype-file.html)\n\n2. [.csv file of snps](../ms-201608-1/lipid-snps.txt)\n\n3. [List of snps for study and code used to generate list](../ms-201608-1/snp-list.html)",
+    "created" : 1484417896650.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4271748473",
+    "id" : "E7C59E6F",
+    "lastKnownWriteTime" : 1484421801,
+    "last_content_update" : 1484421801981,
+    "path" : "~/unc.grad.school/github-repos/lipid-var-child.md",
+    "project_path" : "lipid-var-child.md",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "markdown"
+}

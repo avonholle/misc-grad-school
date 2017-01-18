@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "---\nlayout: page\ntitle: confirmatory factor analysis (CFA) lipids project work\n---\n\n# Title\n\nMultivariate lipid distribution differences across time and race/ethnic groups: United States, 2003-2012\n\n# Status\n\nMaking poster for [AHA EPID/Lifestyle 2017](http://professional.heart.org/professional/EducationMeetings/MeetingsLiveCME/EPILifestyle/UCM_316904_EPILifestyle-Scientific-Sessions.jsp) meetings.\n\n# Statistical Analysis Plan (SAP)\n\n[SAP with draft abstract](../ms201608-2/StatisticalAnalysisPlan.html)\n\n# Manuscript draft\n\n[Link to google docs draft here.]\n\n# Repo\n\n[put link to github repo here]\n\n---\n\n# Results\n\n[Descriptive measures](../ms201608-2/group1.html)\n\n## Confirmatory Factor Analyses (CFA)\n\n[Initial analyses from Mplus runs](https://avonholle.github.io/ms201608-2/mplus-results.html)\n\n[Mplus sensitivity analysis. Look at useobservations option vs subpopulation for complex survey data analyses](../ms201608-2/mplus-check1.html)\n\n\n## Biplots\n\n[Both genders](../ms201608-2/data-explore.html)\n\n[females](../ms201608-2/data-explore-female.html)\n\n[males](../ms201608-2/data-explore-male.html)\n\n[biplots with vectors only](../ms201608-2/matrix-biplot.html)\n\n### Children subset\n\n[Summary statistics in tables](../ms201608-2/group1-youth.html)\n\n[PC biplots](../ms201608-2/data-explore-youth.html)\n\n[biplots grouped by age, no data points](../ms201608-2/matrix-biplot-youth.html)\n\n",
+    "created" : 1484421713998.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2135837243",
+    "id" : "191E9ABF",
+    "lastKnownWriteTime" : 1484421788,
+    "last_content_update" : 1484421788981,
+    "path" : "~/unc.grad.school/github-repos/cfa-lipids.md",
+    "project_path" : "cfa-lipids.md",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "markdown"
+}

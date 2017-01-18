@@ -1,0 +1,30 @@
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="{{ site.baseurl }}">
+		{{site.title}}
+        </a>
+      </h1>
+      <p class="lead">{{ site.description }}</p>
+    </div>
+
+ <nav class="sidebar-nav">
+
+      <a class="sidebar-nav-item{% if page.url == site.baseurl %} active{% endif %}" href="{{ site.baseurl }}">Home</a>
+      <a class="sidebar-nav-item"><hr/></a>
+      
+      <p>Misc Projects</p>
+      <a class="sidebar-nav-item{% if page.url == '/misc-grad-school/venn/' %} active{% endif %}" href="/misc-grad-school/venn">1. Venn diagrams</a>
+
+      <a class="sidebar-nav-item"><hr/></a>
+      
+      <a class="sidebar-nav-item{% if page.url == '/misc-grad-school/about/' %} active{% endif %}" href="/misc-grad-school/about">About</a>
+      <a class="sidebar-nav-item" href="{{ site.github.repo }}">Gitub repo</a>
+</nav>
+
+
+    <p>&copy; {{ site.time | date: '%Y' }}. All rights reserved.</p>
+    <p>this web page based on the hyde jekyll theme</p>
+  </div>
+</div>
