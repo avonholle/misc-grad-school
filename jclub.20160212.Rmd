@@ -1,0 +1,176 @@
+---
+ioslides_presentation: default
+author: "Ann Von Holle"
+date: "February 2, 2016"
+output:
+  ioslides_presentation:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 4
+    font_adjustment: -1
+  slidy_presentation: default
+bibliography: bib1.bib
+title: "CVD EPID Journal Club"
+csl: american-journal-of-epidemiology.csl
+beamer_presentation: default
+---
+
+
+## Application of Pediatric and Adult Guidelines for Treatment of Lipid Levels Among US Adolescents Transitioning to Young Adulthood
+
+
+Gooding HC, Rodday AM, Wong JB, Gillman MW, Lloyd-Jones DM, Leslie LK, et al. Application of Pediatric and Adult Guidelines for Treatment of Lipid Levels Among US Adolescents Transitioning to Young Adulthood. JAMA Pediatrics. 2015 Jun 1;169(6):569. [@gooding_application_2015]
+
+<!-- Note: find out how to put citation in footer in this format -->
+<!-- Discuss reasons why I chose this paper -->
+
+<!-- Add more general background page on use of LDL for screening/medication-->
+
+## Background (1)
+
+* Recommendation for universal LDL-C screening in children 17-21 years and statin treatment for high risk individuals 
+    * Different reccomendations for this age group given two different guidelines.
+    * These differences can cause confusion.
+
+## Background (2)
+
+| | 2011 | 2013 | 
+| ---- | ---- | ---- |
+| |National Heart, Lung, and Blood Institute Integrated Guidelines for Cardiovascular Health and Risk Reduction in Children and Adolescents |  American College of Cardiology and American Heart Association Guideline on the Treatment of Blood Cholesterol to Reduce Atherosclerotic Cardiovascular Risk in Adults |
+| Without risk factors | LDL $\ge$ 190 mg/dL | LDL $\ge$ 190 mg/dL |
+| **With** comorbid risk factors ( hypertension, tobacco use, and obesity) | LDL $\ge$ 130 or LDL $\ge$ 160 mg/dL | LDL $\ge$ 190 mg/dL |
+
+
+## Background (3)
+
+* What are the high-level pediatric risk factors?
+    * High blood pressure
+    * High BMI
+    * Smoking
+    * Diabetes Mellitus
+  
+* What are the moderate-level pediatric risk factors?
+    * Blood pressure
+    * BMI
+    * HDL-C
+
+## Study Aim
+
+There are discrepancies between the two guidelines for people who transition to adulthood, ages 17 to 21 years.
+
+* What proportion of people would meet the criteria for each of the guidelines?
+
+
+## Methods (1) -- Sample
+
+  * NHANES
+      * 1/1/1999 to 12/31/2012 (14 years)
+      * 17 to 21 years (n=6,338)
+      
+    * Exclusions
+        * pregnant (1.8%)
+        * on lipid lowering medication (2.8%)
+        
+## Methods (2) -- Imputation
+
+  1. Created 10 separate imputed data sets.
+      * Calculate the proportion of participants with the guideline risk factors 
+  2. Get frequency of risk factors in the source population of interest
+      * Combine those 10 different estimates to create a composite representing the imputed subgroup frequencies in a nationally representative sample of the United States.
+  3. Estimate the number of people with these characteristics
+      * With those subgroup frequencies, apply to the estimated number of people ages 17-21 years in the United States.
+
+## Results (1)
+
+Percentage treated ages 17-21:
+
+| | Pediatric | Adult |
+| -- | -- | -- |
+| Percent (95% CI) | 2.5 (1.8 to 3.2) | 0.4 (0.1 to 0.8) | 
+| Count (of 20.4 million) | 483,500 (482,100 to 484,800)  | 78,200 ( 77,600 to 78,700) |
+
+## Results (1)
+
+| Most common risk factors | Percent (95% CI)|
+| -- | -- |
+| Smoking | 55 (41-69) |
+| Obesity | 68 (55-81) | 
+| Low HDL-C | 48 (34-61) |
+
+
+| | Pediatric | Adult | Fold Increase |
+| -- | -- | -- | -- |
+| Male | 2.9 | 0.4 | $\frac{2.9-0.4}{0.4} = 6.25$ |
+| Female | 2.1 | 0.4 | $\frac{2.1-0.4}{0.4} = 4.25$ |
+
+
+<!-- Note: they interpreted fold change incorrectly.-->
+
+## Discussion
+
+* Disconnect between the two guidelines
+    * A child could be on statins, transition to adult status, then no longer be eligible.
+    * The example they give is a 20-year old obese male with LDL-C mg/dL, smokes cigarettes and family history of early ASCVD.
+
+
+* Limitations
+    1) Single point data collection vs multiple measurements after lifestyle efforts
+    2) few participants with LDL-C < 190 mg/dL
+    3) discarded self report of ASCVD
+    4) self-report of family history of ASCVD
+    
+
+## Summary 
+
+* Under pediatric guidelines many more treated (>400,000 people) if following guidelines
+
+* Mostly likely an over-estimate
+    * Mentions 'disagreement with recommendations'
+    * adherence to medication regimen
+    * uncertain state of knowledge
+
+
+## Extra questions (1)
+
+* Methods-related: Is the imputation for LDL a problem considering so many missing and no sensitivity analysis mentioned (for the imputation procedure)
+      * LDL-C missing for 3,686 of the 6,338 participants (58.2% missing)
+      * More imputation data sets?
+      * Sensitivity analysis to departure from missing at random (MAR) assumption? [@hayati_rezvan_rise_2015]
+
+## Extra questions (2)
+
+* Given the range of time for estimates (1999-2010) how will these estimates change with temporal effects in child obesity prevalence?
+
+* Gender differences in dyslipidemia tracking to adulthood.
+    * Less tracking for females. Will this create a benefit-harm imbalance?
+    
+* 'Refractory to other interventions' (mentioned in Benuck [@@benuck_point:_2015])
+    * This group could be the majority of children based on calculations in Gooding paper.
+    * As pointed out in Benuck the economic health costs are unknown.
+    * As pointed out by Belamarich [@belamarich_counterpoint:_2015], these families may not come back for follow-up.
+    * How will this screening work in practice?
+
+<!-- Add in more points from two point/counterpoint papers.-->
+
+
+<!-- TO DO: look up the ways to conduct sensitivity analyses for imputation. and what effects could there be? -->
+
+
+## Extras
+
+### Friedewald equation
+
+*This equation is based on an analysis of 448 patients from 1972 and estimates LDL-C as*
+
+\[
+  \textrm{TC} - \textrm{HDL-C} - \frac{\textrm{TG}}{5}
+\]
+
+*in mg/dL. The final term assumes a fixed ratio of triglyceride levels to very low-density lipoprotein cholesterol (TG:VLDL-C) of 5:1. [@martin_comparison_2013]*
+
+* TC = total cholesterol
+* HDL-C = high density lipoprotein cholesterol 
+* TG = triglycerides
+
+
+## References{.smaller}
