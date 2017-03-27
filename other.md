@@ -8,3 +8,5 @@ permalink: /other/
 
 [2016 cvd journal club presentation](../jclub.20160212.html) -- [code](../jclub.20160212.Rmd){:target="_blank"}
 
+[Sample SAS code for imputation and inverse probability treatment weights (IPTW)](../sim.html){:targe="_blank"}
+
