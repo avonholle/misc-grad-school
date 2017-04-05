@@ -16,4 +16,4 @@ A repository for small projects unrelated to my dissertation
 5. after done running, look at your log: 'nano *.log'
 6. 
 
-More good info at [ats.ucla.edu](http://stats.idre.ucla.edu/sas/seminars/multiple-imputation-in-sas/mi_new_1/)
+More good info on proc mi at [ats.ucla.edu](http://stats.idre.ucla.edu/sas/seminars/multiple-imputation-in-sas/mi_new_1/)
