@@ -15,3 +15,5 @@ A repository for small projects unrelated to my dissertation
 4. check if your job is running: "squeue -u <onyen>"
 5. after done running, look at your log: 'nano *.log'
 6. 
+
+More good info at (ats.ucla.edu)[http://stats.idre.ucla.edu/sas/seminars/multiple-imputation-in-sas/mi_new_1/]
