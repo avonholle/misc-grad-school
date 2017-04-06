@@ -1,3 +1,11 @@
+* ----------------------------;
+* Investigator: Jen Yourkavitch
+* Analyst/Programmer: Jen Yourkavitch
+* Program: wts_mi_code_avh_check.sas
+* Task: debug mi algorith for dissertation analyses
+* Date: April, 2017
+* --------------------------------;
+
 options nofmterr nonotes;
 libname dissert "/pine/scr/v/o/vonholle/jen.y";
 

@@ -1,0 +1,150 @@
+1                                                          The SAS System                              07:26 Thursday, April 6, 2017
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to UNIVERSITY OF NORTH CAROLINA CHAPEL HILL - SFA T&R, Site 70084073.
+NOTE: This session is executing on the Linux 3.10.0-327.36.3.el7.x86_64 (LIN X64) platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/ETS 14.1
+      SAS/OR 14.1
+      SAS/IML 14.1
+      SAS/QC 14.1
+
+NOTE: Additional host information:
+
+ Linux LIN X64 3.10.0-327.36.3.el7.x86_64 #1 SMP Thu Oct 20 04:56:07 EDT 2016 x86_64 Red Hat Enterprise Linux Server release 7.2 
+      (Maipo) 
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           1.42 seconds
+      cpu time            0.04 seconds
+      
+1          options nofmterr nonotes;
+2          libname dissert "/pine/scr/v/o/vonholle/jen.y";
+3          
+4          data diss1;
+5          set dissert.diss1;
+6          run;
+7          
+8          
+9          proc means data=diss1 n nmiss mean sum min max;
+10         	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir
+10       ! no2worksup;
+11         	where m2bfed=1;
+12         	title "Var check";
+13         	run;
+14         
+15         
+2                                                          The SAS System                              07:26 Thursday, April 6, 2017
+
+16         *MI, assuming MVN.;
+17         
+18         	
+18       !  proc mi data=diss1 seed=3 nimpute=2 out=c;
+19         	var expo work bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 wenvir no2worksup time event1
+19       ! income lpt m2bfed marital;
+20         	mcmc; *default is chain=single nbiter=200 niter=100 prior=Jeffreys initial=EM;
+21         	run;
+WARNING: The EM algorithm (MLE) fails to converge after 200 iterations. You can increase the number of iterations (MAXITER= option) 
+         or increase the value of the convergence criterion (CONVERGE= option).
+WARNING: The EM algorithm (posterior mode) fails to converge after 200 iterations. You can increase the number of iterations 
+         (MAXITER= option) or increase the value of the convergence criterion (CONVERGE= option).
+22         
+23         	
+23       !  proc means data=c n nmiss mean sum min max;
+24         	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir
+24       ! no2worksup;
+25         	where m2bfed=1;
+26         	title "Var check";
+27         	run;
+28         
+29         * create weights with this dataset c;
+30         
+31         * This is 718 code from 2016. QUESTION 3 ;
+32         	** Estimate PS for each individual in the dataset using a well-specified model **;
+33         	
+33       !  proc logistic data=c descending ;
+34         	 	model anybf2mod =	educ p9 n34 marital;
+35         					/* add in a bunch of interaction terms to get at multidimensional standardization */
+36         					
+37         		by _imputation_;
+38         	 	output out=tables2 predicted=ps;
+39         		run;
+40         		
+40       !   proc univariate data = tables2;
+41         			var ps;
+42         			run;
+43         
+44         			
+44       !    proc univariate data = tables2;
+45         			var ps;
+46         			run;
+47         			
+47       !    proc genmod data = tables2 descending;
+48         			model anybf2mod = / link = log dist = binomial;
+49         by _imputation_;
+50         			estimate 'marg' int 1 / exp;
+51         			output out=iptw p=marg_pr_exp;
+52         			run;
+52       !         *not working: insufficient space in file work.iptw.data; *disk full";
+53         
+54         					
+55         	* Create stabilized and unstabilized inverse probability weights ;
+56         		
+56       !   data iptw; set iptw;
+57         			sw = anybf2mod*marg_pr_exp/ps + (1-anybf2mod)*(1-marg_pr_exp)/(1-ps);
+58         			w = 1/ps + (1-anybf2mod)/(1-ps);
+59         			run;
+3                                                          The SAS System                              07:26 Thursday, April 6, 2017
+
+60         			
+60       !    proc univariate data = iptw;
+61         				var w sw;
+62         				run;
+63         
+64         		
+65         	* Sort for characterization by exposure status ;
+66         		
+66       !   proc sort data = iptw out = iptw;
+67         			by descending anybf2mod;
+68         			run;
+69         
+70         
+71         	** Check distribution of weights **;
+72         
+73         		* first, in the iptw dataset ;
+74         			
+74       !    proc univariate data = iptw nextrobs=0;
+75         				var sw;
+76         				title 'iptw data'; run;
+76       !                             title;
+77         			
+78         		* second, by anybf2mod status ;
+79         			
+79       !    proc univariate data = iptw nextrobs=0;
+80         				by descending anybf2mod;
+81         				var sw;
+82         				title 'by anybf2mod status'; run;
