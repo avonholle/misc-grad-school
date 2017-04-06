@@ -5,15 +5,18 @@ data diss1;
 set dissert.diss1;
 run;
 
+
 proc means data=diss1 n nmiss mean sum min max; 
 	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup;
 	where m2bfed=1;
 	title "Var check";
 	run;
-	
+
+
 *MI, assuming MVN.;
+
 	proc mi data=diss1 seed=3 nimpute=2 out=c; 
-	var expo work bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 wenvir no2worksup time event1 income lpt educ anybf2mod m2bfed marital;
+	var expo work bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 wenvir no2worksup time event1 income lpt m2bfed marital;
 	mcmc; *default is chain=single nbiter=200 niter=100 prior=Jeffreys initial=EM;
 	run;
 
@@ -22,6 +25,7 @@ proc means data=diss1 n nmiss mean sum min max;
 	where m2bfed=1;
 	title "Var check";
 	run;
+
 * create weights with this dataset c;
 
 * This is 718 code from 2016. QUESTION 3 ;
@@ -184,46 +188,10 @@ proc means data=f;
 	title "Weights";
 	run;
 
-proc print data=f(obs=100) noobs; 
-	var id in out t delta drop _drop num den w2;
-	title "Data expanded for drop out quintiles";
-
-	data dissert.disswt; *selection, confounding, and censoring wts in this dataset;
-	set f;
-	run;
 
 *IP-confounding-and-drop-out weighted curves;
 *The following code gives crude curves, too. From Paul Allison book. 3-11: use this. has legends.;
 	
-	ods graphics on;
-	proc lifetest data=diss1 plots=s(test);
-	time time*event1(0);
-	strata expo;
-	where m2bfed=1;
-	run;
-	ods graphics off;
-	*unadjusted curves. ;
-
-*now, with weight statement;
-	ods graphics on;
-	proc lifetest data=diss1 plots=s(test);
-	time time*event1(0);
-	strata expo;
-	weight w3;
-	where m2bfed=1;
-	run;
-	ods graphics off;
-
-	*now, with weight statement and work strata;
-	ods graphics on;
-	proc lifetest data=diss1 plots=s(test);
-	time time*event1(0);
-	strata expo work;
-	weight w3;
-	where m2bfed=1;
-	run;
-	ods graphics off;
-
 proc means data=f n nmiss mean sum min max; 
 	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup w3 sw w w2;
 	where m2bfed=1;
@@ -231,7 +199,6 @@ proc means data=f n nmiss mean sum min max;
 	run;
 	
 *MI, assuming MVN.;
-
 
 	proc phreg data=f covout outest=d noprint;
 	model time*event1(0)=expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup/rl; 
@@ -243,4 +210,5 @@ proc means data=f n nmiss mean sum min max;
 	modeleffects expo bied white nobfexp work income p31 careplan ret earlyprac noprohelp infageret mbsep1 wenvir lpt no2worksup;	
 	title "Multiple imputation";
 	run;
+
 
