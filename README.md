@@ -7,7 +7,7 @@ A repository for small projects unrelated to my dissertation
 2. [Sample Venn figure code](/venn/Sample-Venn.Rmd)
 
 
-# Longleaf
+# Longleaf and multiple imputation (MI)
 
 1. get and run ssh secure shell (terminal for mac)
 2. transfer over your [sas](/mi/wts_mi_code_avh_check.sas) and [shell script](mi/run1.sh) files to your temp directory in longleaf. Mine is /pine/scr/v/o/vonholle/
