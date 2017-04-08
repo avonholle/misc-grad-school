@@ -1,4 +1,4 @@
-1                                                          The SAS System                              07:26 Thursday, April 6, 2017
+1                                                          The SAS System                                20:25 Friday, April 7, 2017
 
 NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
 NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
@@ -39,112 +39,293 @@ The command line option "-nonews" will prevent this display.
 
 
 NOTE: SAS initialization used:
-      real time           1.42 seconds
-      cpu time            0.04 seconds
+      real time           0.08 seconds
+      cpu time            0.03 seconds
       
-1          options nofmterr nonotes;
-2          libname dissert "/pine/scr/v/o/vonholle/jen.y";
-3          
-4          data diss1;
-5          set dissert.diss1;
-6          run;
-7          
+1          * ----------------------------;
+2          * Investigator: Jen Yourkavitch
+3          * Analyst/Programmer: Jen Yourkavitch
+4          * Program: wts_mi_code_avh_check.sas
+5          * Task: debug mi algorith for dissertation analyses
+6          * Date: April, 2017
+7          * --------------------------------;
 8          
-9          proc means data=diss1 n nmiss mean sum min max;
-10         	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir
-10       ! no2worksup;
-11         	where m2bfed=1;
-12         	title "Var check";
-13         	run;
+9          options nofmterr nonotes;
+10         libname dissert "/pine/scr/v/o/vonholle/jen.y";
+11         *libname dissert "C:\Users\vonholle\Dropbox\unc.grad.school\misc\programs\misc-grad-school\mi\";
+12         ods select attributes;
+13         proc contents data=dissert.diss1; run;
 14         
-15         
-2                                                          The SAS System                              07:26 Thursday, April 6, 2017
+15         * Note: over 3000 variables in data set. Need to include only variables used in analyses;
+16         * variables to use in analysis;
+2                                                          The SAS System                                20:25 Friday, April 7, 2017
 
-16         *MI, assuming MVN.;
-17         
-18         	
-18       !  proc mi data=diss1 seed=3 nimpute=2 out=c;
-19         	var expo work bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 wenvir no2worksup time event1
-19       ! income lpt m2bfed marital;
-20         	mcmc; *default is chain=single nbiter=200 niter=100 prior=Jeffreys initial=EM;
-21         	run;
-WARNING: The EM algorithm (MLE) fails to converge after 200 iterations. You can increase the number of iterations (MAXITER= option) 
-         or increase the value of the convergence criterion (CONVERGE= option).
-WARNING: The EM algorithm (posterior mode) fails to converge after 200 iterations. You can increase the number of iterations 
-         (MAXITER= option) or increase the value of the convergence criterion (CONVERGE= option).
-22         
-23         	
-23       !  proc means data=c n nmiss mean sum min max;
-24         	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir
-24       ! no2worksup;
-25         	where m2bfed=1;
-26         	title "Var check";
-27         	run;
-28         
-29         * create weights with this dataset c;
-30         
-31         * This is 718 code from 2016. QUESTION 3 ;
-32         	** Estimate PS for each individual in the dataset using a well-specified model **;
-33         	
-33       !  proc logistic data=c descending ;
-34         	 	model anybf2mod =	educ p9 n34 marital;
-35         					/* add in a bunch of interaction terms to get at multidimensional standardization */
-36         					
-37         		by _imputation_;
-38         	 	output out=tables2 predicted=ps;
-39         		run;
-40         		
-40       !   proc univariate data = tables2;
-41         			var ps;
-42         			run;
-43         
-44         			
-44       !    proc univariate data = tables2;
-45         			var ps;
-46         			run;
-47         			
-47       !    proc genmod data = tables2 descending;
-48         			model anybf2mod = / link = log dist = binomial;
-49         by _imputation_;
-50         			estimate 'marg' int 1 / exp;
-51         			output out=iptw p=marg_pr_exp;
-52         			run;
-52       !         *not working: insufficient space in file work.iptw.data; *disk full";
-53         
-54         					
-55         	* Create stabilized and unstabilized inverse probability weights ;
-56         		
-56       !   data iptw; set iptw;
-57         			sw = anybf2mod*marg_pr_exp/ps + (1-anybf2mod)*(1-marg_pr_exp)/(1-ps);
-58         			w = 1/ps + (1-anybf2mod)/(1-ps);
-59         			run;
-3                                                          The SAS System                              07:26 Thursday, April 6, 2017
+17         %let vars = time expo work bied white nobfexp p31 careplan ret earlyprac
+18         			noprohelp infageret mbsep1 wenvir no2worksup  event1 income
+19         			lpt m2bfed marital educ p9 n34 anybf2mod sampmiq;
+20         
+21         %let imputevars = time work bied white nobfexp p31 careplan ret earlyprac
+22         			noprohelp infageret mbsep1 wenvir no2worksup  event1 income
+23         			lpt m2bfed marital educ p9 n34;
+24         
+25         data diss1;
+26         set dissert.diss1(keep=&vars.);
+27         miss_n = cmiss(of &vars.);
+28         run;
+29         
+30         proc freq data=diss1; table miss_n; run;
+30       !                                          run; * check;
+31         
+32         
+33         data diss1; set  diss1(where=(miss_n<12 )); * leave in people with 11 or fewer missing observations of xx variables
+33       ! included in analyses (see list above);
+34         run;
+35         
+36         
+37         proc means data=diss1 n nmiss mean sum min max;
+38         	var &imputevars.;
+39         	where m2bfed=1;
+40         	title "Var check";
+41         	run;
+42         
+43         /*
+44         * Look at missing patterns;
+45         	proc mi data=diss1 nimpute=0;
+46         	var &imputevars.;
+47         	run;
+48         */
+49         
+50         *MI, assuming MVN.;
+51         
+52         	
+52       !  proc mi data=diss1 seed=3 nimpute=1000 out=c noprint;
+53         	var &imputevars.;
+54          	em maxiter=1000 converge=1e-4 ;
+55         	run;
+56         
+57         	
+57       !  proc means data=c n nmiss mean sum min max;
+58         	var &imputevars.;
+59         	where m2bfed=1;
+60         	title "Var check";
+61         	run;
+62         
+63         * create weights with this dataset c;
+64         
+65         * This is 718 code from 2016. QUESTION 3 ;
+66         	** Estimate PS for each individual in the dataset using a well-specified model **;
+67         	
+67       !  proc logistic data=c descending noprint ;
+68         	 	model anybf2mod =	educ p9 n34 marital;
+69         					/* add in a bunch of interaction terms to get at multidimensional standardization */
+3                                                          The SAS System                                20:25 Friday, April 7, 2017
 
-60         			
-60       !    proc univariate data = iptw;
-61         				var w sw;
-62         				run;
-63         
-64         		
-65         	* Sort for characterization by exposure status ;
-66         		
-66       !   proc sort data = iptw out = iptw;
-67         			by descending anybf2mod;
-68         			run;
-69         
-70         
-71         	** Check distribution of weights **;
-72         
-73         		* first, in the iptw dataset ;
-74         			
-74       !    proc univariate data = iptw nextrobs=0;
-75         				var sw;
-76         				title 'iptw data'; run;
-76       !                             title;
-77         			
-78         		* second, by anybf2mod status ;
-79         			
-79       !    proc univariate data = iptw nextrobs=0;
-80         				by descending anybf2mod;
-81         				var sw;
-82         				title 'by anybf2mod status'; run;
+70         					
+71         		by _imputation_;
+72         	 	output out=tables2 predicted=ps;
+73         		run;
+74         		
+74       !   proc univariate data = tables2;
+75         			var ps;
+76         			run;
+77         
+78         			
+78       !    proc univariate data = tables2;
+79         			var ps;
+80         			run;
+81         
+82         			ods exclude all;
+83         			
+83       !    proc genmod data = tables2 descending;
+84         			model anybf2mod = / link = log dist = binomial;
+85         			by _imputation_;
+86         			estimate 'marg' int 1 / exp;
+87         			output out=iptw p=marg_pr_exp;
+88         			run;
+88       !         *not working: insufficient space in file work.iptw.data; *disk full";
+89         			ods exclude none;
+90         					
+91         	* Create stabilized and unstabilized inverse probability weights ;
+92         		
+92       !   data iptw; set iptw;
+93         			sw = anybf2mod*marg_pr_exp/ps + (1-anybf2mod)*(1-marg_pr_exp)/(1-ps);
+94         			w = 1/ps + (1-anybf2mod)/(1-ps);
+95         			run;
+96         			
+96       !    proc univariate data = iptw;
+97         				var w sw;
+98         				run;
+99         
+100        /*
+101        	* Sort for characterization by exposure status ;
+102        		proc sort data = iptw out = iptw;
+103        			by descending anybf2mod;
+104        			run;
+105        
+106        
+107        	** Check distribution of weights **;
+108        
+109        		* first, in the iptw dataset ;
+110        			proc univariate data = iptw nextrobs=0;
+111        				var sw;
+112        				title 'iptw data'; run; title;
+113        			
+114        		* second, by anybf2mod status ;
+115        			proc univariate data = iptw nextrobs=0;
+116        				by descending anybf2mod;
+117        				var sw;
+118        				title 'by anybf2mod status'; run; title;
+119        */
+120        
+121        	*IP WEIGHTS;
+4                                                          The SAS System                                20:25 Friday, April 7, 2017
+
+122        
+123        	*Model for numerator of weights, to stabilize variance;
+124        proc logistic data=iptw desc noprint; *this is not MI dataset;
+125        	model expo=;
+126        	by _imputation_;
+127        	output out=n p=n;
+128        	run;
+129        
+130        *Model for denominator of weights, to control confounding;
+131        proc logistic data=iptw desc noprint;
+132        	model expo=income bied work white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup;
+133        	by _imputation_;
+134        	output out=d p=d;
+135        	run;
+135      !       *this blows up SAS: "file work.n.data is damaged";
+136        
+137        *Construct weights;
+138        data iptw;
+139        	merge iptw n d;
+140        	by _imputation_;
+141        	if expo then w=n/d;
+142        	else w=(1-n)/(1-d);
+143        	label n= d=;
+144        	drop _level_;
+145        	run;
+146        proc means data=iptw;
+147        	var n d w;
+148        	title "IP confounding weights";
+149        	run;
+150        data iptw1;
+151        set iptw;
+152        scon=sw*w; *this is the selection weight times the confounding weight;
+153        run;
+154        
+155        ****IP-censoring weights ;
+156        
+157        data iptw2;
+158        set iptw1;
+159        if event1=0 and time LE 52 then drop=1;
+160        else drop=0;
+161        run;
+162        proc freq data=iptw2;
+163        tables drop/missing;
+164        where m2bfed=1;
+165        run;
+166        
+167        *Add a constant for merging;
+168        data iptw2; set iptw2; retain z 1;
+169        run;
+170        
+171        *Grab quintiles of the observed drop out times to merge with data;
+172        proc univariate data=iptw2 noprint;
+173        	where drop=1; var time;
+174        	output out=q pctlpts= 50  pctlpre=p;
+175        	by _imputation_;
+176        	run;
+177        data q; set q; p0=0; p100=65; z=1; * 65 is max time in years for this data set;
+178        run;
+5                                                          The SAS System                                20:25 Friday, April 7, 2017
+
+179        
+180        proc print data=q(obs=10) noobs;
+181        	var p0 p50 p100;
+182        	title "Quantiles of the drop out distribution";
+183        	run;
+183      !       *Note that p20 and p60 have 0 obs--?;
+184        
+185        	*NOTE: these data don't have a lot of variability of time to event. dropped percentiles to just median. ;
+186        	* many (over 25%) of people have 0 time to event. Need to look into that.;
+187        *Expand data to up to xx records per unit;
+188        data e; merge iptw2 q;
+189        by z _imputation_;
+190        	array j{3} p0 p50 p100;
+191        	do k=1 to 2;
+192        		in=j(k);
+193        		if j(k)<time<=j(k+1) then do;
+194        			out=time;
+195        			event2=event1; *make a time-varying event indicator;
+196        			_drop=drop; *make a time-varying drop indicator;
+197        			output;
+198        		end;
+199        		else if j(k+1)<time then do; out=j(k+1); event2=0; _drop=0; output; end;
+200        	end;
+201        	run;
+202        
+203        proc sort data=e; by _imputation_ sampmiq in;
+204        run;
+205        
+206        *drop-out numerator model. ;
+207        proc logistic data=e noprint;
+208        	class in/param=ref desc;
+209        	by _imputation_;
+210        	model _drop=in;
+211        	output out=nm2(keep=sampmiq _drop nm2 in out _imputation_) prob=nm2;
+212        	run;
+213        *drop-out denominator model. ;
+214        proc logistic data=e noprint; 	
+215        	class in/param=ref desc;
+216        	model _drop=in expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir
+216      ! no2worksup;
+217        	by _imputation_;
+218        	output out=dn2(keep=sampmiq _drop dn2 in out _imputation_) prob=dn2;
+219        	run;
+220        *drop-out weights;
+221        proc sort data=nm2; by _imputation_ sampmiq in; run;
+222        proc sort data=dn2; by  _imputation_ sampmiq in; run;
+223        data f; merge e nm2 dn2; by _imputation_ sampmiq in; retain num den;
+224        	if first.sampmiq then do; num=1; den=1; end;
+225        	num=num*nm2;
+226        	den=den*dn2;
+227        	if _drop then w2=(1-num)/(1-den); else w2=num/den;
+228        	w3=scon*w2; *this is IP weight (times selection wt) times censoring wt;
+229        	label nm2= dn2=;
+230        	run;
+231        
+232        proc means data=f;
+233        	var scon w2 w3 num den;
+234        	title "Weights";
+6                                                          The SAS System                                20:25 Friday, April 7, 2017
+
+235        	run;
+236        
+237        
+238        *IP-confounding-and-drop-out weighted curves;
+239        *The following code gives crude curves, too. From Paul Allison book. 3-11: use this. has legends.;
+240        	
+241        proc means data=f n nmiss mean sum min max;
+242        	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir
+242      ! no2worksup w3 sw w w2;
+243        	where m2bfed=1;
+244        	title "Var check";
+245        	run;
+246        	
+247        *MI, assuming MVN.;
+248        
+249        	
+249      !  proc phreg data=f covout outest=d noprint;
+250        	model time*event1(0)=expo /rl; * NOTE: no need to include confounders here since you have iptw;
+251        	weight w3;
+252        	by _imputation_;
+253        	run;
+254        
+255        	
+255      !  proc mianalyze data=d;
+256        	modeleffects expo ;	
+257        	title "Multiple imputation";
+258        	run;
+259        
+260        

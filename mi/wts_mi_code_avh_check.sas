@@ -8,28 +8,54 @@
 
 options nofmterr nonotes;
 libname dissert "/pine/scr/v/o/vonholle/jen.y";
+*libname dissert "C:\Users\vonholle\Dropbox\unc.grad.school\misc\programs\misc-grad-school\mi\";
+ods select attributes;
+proc contents data=dissert.diss1; run;
+
+* Note: over 3000 variables in data set. Need to include only variables used in analyses;
+* variables to use in analysis;
+%let vars = time expo work bied white nobfexp p31 careplan ret earlyprac 
+			noprohelp infageret mbsep1 wenvir no2worksup  event1 income 
+			lpt m2bfed marital educ p9 n34 anybf2mod sampmiq;
+
+%let imputevars = time work bied white nobfexp p31 careplan ret earlyprac 
+			noprohelp infageret mbsep1 wenvir no2worksup  event1 income 
+			lpt m2bfed marital educ p9 n34;
 
 data diss1;
-set dissert.diss1;
+set dissert.diss1(keep=&vars.);
+miss_n = cmiss(of &vars.);
+run;
+
+proc freq data=diss1; table miss_n; run; run; * check;
+
+
+data diss1; set  diss1(where=(miss_n<12 )); * leave in people with 11 or fewer missing observations of xx variables included in analyses (see list above);
 run;
 
 
 proc means data=diss1 n nmiss mean sum min max; 
-	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup;
+	var &imputevars.;
 	where m2bfed=1;
 	title "Var check";
 	run;
 
+/*
+* Look at missing patterns;
+	proc mi data=diss1 nimpute=0;
+	var &imputevars.;
+	run;
+*/
 
 *MI, assuming MVN.;
 
-	proc mi data=diss1 seed=3 nimpute=2 out=c; 
-	var expo work bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 wenvir no2worksup time event1 income lpt m2bfed marital;
-	mcmc; *default is chain=single nbiter=200 niter=100 prior=Jeffreys initial=EM;
+	proc mi data=diss1 seed=3 nimpute=1000 out=c noprint; 
+	var &imputevars.;
+ 	em maxiter=1000 converge=1e-4 ;
 	run;
 
 	proc means data=c n nmiss mean sum min max; 
-	var time event1 expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup;
+	var &imputevars.;
 	where m2bfed=1;
 	title "Var check";
 	run;
@@ -38,7 +64,7 @@ proc means data=diss1 n nmiss mean sum min max;
 
 * This is 718 code from 2016. QUESTION 3 ;
 	** Estimate PS for each individual in the dataset using a well-specified model **;
-	proc logistic data=c descending ;
+	proc logistic data=c descending noprint ;
 	 	model anybf2mod =	educ p9 n34 marital;
 					/* add in a bunch of interaction terms to get at multidimensional standardization */
 					
@@ -52,13 +78,15 @@ proc means data=diss1 n nmiss mean sum min max;
 			proc univariate data = tables2;
 			var ps;
 			run;
+
+			ods exclude all;
 			proc genmod data = tables2 descending;
 			model anybf2mod = / link = log dist = binomial;
-by _imputation_;
+			by _imputation_;
 			estimate 'marg' int 1 / exp;
 			output out=iptw p=marg_pr_exp;
 			run; *not working: insufficient space in file work.iptw.data; *disk full";
-
+			ods exclude none;
 					
 	* Create stabilized and unstabilized inverse probability weights ;
 		data iptw; set iptw;
@@ -69,7 +97,7 @@ by _imputation_;
 				var w sw;
 				run;
 
-		
+/*
 	* Sort for characterization by exposure status ;
 		proc sort data = iptw out = iptw;
 			by descending anybf2mod;
@@ -88,27 +116,28 @@ by _imputation_;
 				by descending anybf2mod;
 				var sw;
 				title 'by anybf2mod status'; run; title;
-
+*/
 
 	*IP WEIGHTS;
 
 	*Model for numerator of weights, to stabilize variance;
 proc logistic data=iptw desc noprint; *this is not MI dataset;
 	model expo=; 
-	*by _imputation_;
+	by _imputation_;
 	output out=n p=n;
 	run;
 
 *Model for denominator of weights, to control confounding;
 proc logistic data=iptw desc noprint; 
 	model expo=income bied work white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup; 
-	*by _imputation_;
+	by _imputation_;
 	output out=d p=d;
 	run; *this blows up SAS: "file work.n.data is damaged";
 
 *Construct weights;
 data iptw;
 	merge iptw n d;
+	by _imputation_;
 	if expo then w=n/d;
 	else w=(1-n)/(1-d);
 	label n= d=;
@@ -142,19 +171,24 @@ run;
 *Grab quintiles of the observed drop out times to merge with data;
 proc univariate data=iptw2 noprint;
 	where drop=1; var time;
-	output out=q pctlpts=20 40 60 80 pctlpre=p;
+	output out=q pctlpts= 50  pctlpre=p;
+	by _imputation_;
 	run; 
-data q; set q; p0=0; p100=10; z=1;
+data q; set q; p0=0; p100=65; z=1; * 65 is max time in years for this data set;
 run;
-proc print data=q noobs; 
-	var p0 p20 p40 p60 p80 p100;
+
+proc print data=q(obs=10) noobs; 
+	var p0 p50 p100;
 	title "Quantiles of the drop out distribution";
 	run; *Note that p20 and p60 have 0 obs--?;
 
-*Expand data to up to 5 records per unit;
-data e; merge iptw2 q; by z;
-	array j{6} p0 p20 p40 p60 p80 p100;
-	do k=1 to 5;
+	*NOTE: these data don't have a lot of variability of time to event. dropped percentiles to just median. ;
+	* many (over 25%) of people have 0 time to event. Need to look into that.;
+*Expand data to up to xx records per unit;
+data e; merge iptw2 q; 
+by z _imputation_;
+	array j{3} p0 p50 p100;
+	do k=1 to 2;
 		in=j(k);
 		if j(k)<time<=j(k+1) then do; 
 			out=time; 
@@ -165,25 +199,28 @@ data e; merge iptw2 q; by z;
 		else if j(k+1)<time then do; out=j(k+1); event2=0; _drop=0; output; end;
 	end;
 	run;
-proc sort data=e; by sampmiq in;
+
+proc sort data=e; by _imputation_ sampmiq in;
 run;
 
 *drop-out numerator model. ;
 proc logistic data=e noprint; 
 	class in/param=ref desc; 
+	by _imputation_;
 	model _drop=in;
-	output out=nm2(keep=sampmiq _drop nm2 in out) prob=nm2;
+	output out=nm2(keep=sampmiq _drop nm2 in out _imputation_) prob=nm2;
 	run;
 *drop-out denominator model. ;
 proc logistic data=e noprint; 	
 	class in/param=ref desc; 
 	model _drop=in expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup;
-	output out=dn2(keep=sampmiq _drop dn2 in out) prob=dn2;
+	by _imputation_;
+	output out=dn2(keep=sampmiq _drop dn2 in out _imputation_) prob=dn2;
 	run;
 *drop-out weights;
-proc sort data=nm2; by sampmiq in; run;
-proc sort data=dn2; by sampmiq in; run;
-data f; merge e nm2 dn2; by sampmiq in; retain num den;
+proc sort data=nm2; by _imputation_ sampmiq in; run;
+proc sort data=dn2; by  _imputation_ sampmiq in; run;
+data f; merge e nm2 dn2; by _imputation_ sampmiq in; retain num den;
 	if first.sampmiq then do; num=1; den=1; end;
 	num=num*nm2;
 	den=den*dn2;
@@ -191,6 +228,7 @@ data f; merge e nm2 dn2; by sampmiq in; retain num den;
 	w3=scon*w2; *this is IP weight (times selection wt) times censoring wt;
 	label nm2= dn2=;
 	run;
+
 proc means data=f; 
 	var scon w2 w3 num den;  
 	title "Weights";
@@ -209,13 +247,13 @@ proc means data=f n nmiss mean sum min max;
 *MI, assuming MVN.;
 
 	proc phreg data=f covout outest=d noprint;
-	model time*event1(0)=expo work income bied white nobfexp p31 careplan ret earlyprac noprohelp infageret mbsep1 lpt wenvir no2worksup/rl; 
+	model time*event1(0)=expo /rl; * NOTE: no need to include confounders here since you have iptw;
 	weight w3;
 	by _imputation_; 
 	run;
 
 	proc mianalyze data=d; 
-	modeleffects expo bied white nobfexp work income p31 careplan ret earlyprac noprohelp infageret mbsep1 wenvir lpt no2worksup;	
+	modeleffects expo ;	
 	title "Multiple imputation";
 	run;
 
